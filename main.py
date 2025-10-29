@@ -47,35 +47,29 @@ def coerce_bool(value: Any) -> bool:
 
 def validate_config(cfg: Dict[str, Any]) -> Dict[str, Any]:
     validated = {}
-    # Проверяем наличие всех полей
     for key, expected_type in EXPECTED_KEYS.items():
         if key not in cfg:
             raise ConfigError(f"Отсутствует обязательный параметр: '{key}'")
 
-    # package_name: непустая строка
     pn = cfg["package_name"]
     if not isinstance(pn, str) or not pn.strip():
         raise ConfigError("package_name должен быть непустой строкой.")
     validated["package_name"] = pn.strip()
 
-    # repo: непустая строка (URL или путь)
     repo = cfg["repo"]
     if not isinstance(repo, str) or not repo.strip():
         raise ConfigError("repo должен быть непустой строкой (URL или путь к тестовому репозиторию).")
     validated["repo"] = repo.strip()
 
-    # test_mode: булево (поддерживаются также "true"/"false", 1/0)
     try:
         validated["test_mode"] = coerce_bool(cfg["test_mode"])
     except ConfigError as e:
         raise ConfigError(f"test_mode: {e}")
 
-    # version: строка (разрешаем любую непустую строку)
     version = cfg["version"]
     if not isinstance(version, str) or not version.strip():
         raise ConfigError("version должен быть непустой строкой.") #
 
-    # max_depth: целое >=1
     md = cfg["max_depth"]
     if isinstance(md, (int, float)) and float(md).is_integer():
         md_int = int(md)
@@ -96,8 +90,8 @@ def print_kv(cfg: Dict[str, Any]) -> None:
 
 
 def build_argparser() -> argparse.ArgumentParser:
-    p = argparse.ArgumentParser(description="Dependency graph visualizer (proto) — variant 11, stage 1")
-    p.add_argument("-c", "--config", default="config.json", help="Path to JSON config file (default: config.json)")
+    p = argparse.ArgumentParser()
+    p.add_argument("-c", "--config", default="config.json")
     return p
 
 
@@ -115,7 +109,7 @@ def main():
         print(f"Неожиданная ошибка: {e}", file=sys.stderr)
         sys.exit(3)
 
-    print_kv(cfg)
+    print_kv(cfg) # только для этого этапа лоль
 
 
 if __name__ == "__main__":
